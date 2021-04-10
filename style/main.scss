@@ -1,0 +1,250 @@
+body {
+  background: rgb(70, 70, 70);
+  background-image: url(../gfx/menu/bg_default.png);
+  background-size: cover;
+}
+
+.frame {
+  position: fixed;
+  width: 100vw;
+  height: 53vw;
+  max-height: 100vh;
+  background: grey;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  margin: auto;
+  user-select: none;
+
+  .hidden {
+    display: none;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .textBox {
+    width: auto;
+    height: auto;
+    min-width: 8%;
+    min-height: 4.8%;
+    max-width: 16%;
+    max-height: 9.6%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 0.5%;
+    background-image: url(../gfx/menu/bg_paper.png);
+    box-shadow: 0vw 0vw 0.2vw 0.12vw rgb(124, 108, 37);
+    background-size: cover;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 10;
+
+    p, span {
+      font-size: 0.8vw;
+      color: rgb(15, 15, 15);
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      text-shadow: 0vw 0vw 0.05vw black;
+    }
+  }
+
+  .sideBar {
+    height: 100%;
+    width: 20%;
+    background-image: url(../gfx/menu/bg_menu.png);
+    background-size: cover;
+    box-sizing: border-box;
+    border: 8px solid rgb(70, 70, 70);
+    position: absolute;
+  }
+
+  > .partyBar {
+    left: 0;
+
+    .partyContainer {
+      width: 100%;
+      height: 75%;
+      position: relative;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+      margin: 0;
+    }
+  }
+
+  > .infoBar {
+    right: 0;
+  }
+
+  .textMap {
+    height: 85%;
+    width: 60%;
+    background-image: url(../gfx/menu/text_bg.png);
+    background-size: cover;
+    position: absolute;
+    left: 20%;
+    overflow: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+    border: 8px solid rgb(50, 50, 50);
+
+    .gameFrame {
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      position: absolute;
+      left: 0;
+      top: 0;
+      overflow: hidden;
+      overflow-y: auto;
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+
+      .por-container {
+        width: 100%;
+        height: 25%;
+        position: relative;
+        left: 0;
+        top: 0;
+        display: flex;
+        justify-content: center;
+
+        .portraitFrame {
+          width: 16%;
+          height: 100%;
+          overflow: hidden;
+          box-sizing: border-box;
+          border: 0.2vw solid grey;
+          background:rgb(40, 40, 40);
+          background-image: var(--bg-noise);
+          border-radius: 1vw;
+          margin: 2.5%;
+
+          p {
+            font-size: 1vw;
+            color: white;
+            margin: 0.5vw;
+            text-shadow: -0.1vw 0.1vw 0.1vw black;
+          }
+
+          .porImg {
+            width: 6vw;
+            height: 6vw;
+            border-radius: 50%;
+            box-sizing: border-box;
+            border: 0.12vw solid black;
+            box-shadow: 0vw 0vw 0.4vw 0.25vw rgb(40, 20, 20);
+          }
+        }
+      }
+
+      .regular_text {
+        position: relative;
+        font-size: 0.92vw;
+        color: white;
+        text-shadow: -0.1vw 0.1vw 0.05vw rgb(50, 50, 50);
+      }
+
+      .separator {
+        position: relative;
+        font-size: 1.42vw;
+        color: white;
+      }
+    }
+  }
+
+  .actionsContainer {
+    height: 15%;
+    width: 60%;
+    background-image: url(../gfx/menu/bg_action.png);
+    background-size: cover;
+    position: absolute;
+    left: 20%;
+    bottom: 0;
+    box-sizing: border-box;
+    border: 8px solid rgb(60, 60, 60);
+  }
+
+  .characterPortrait {
+    width: 100%;
+    height: 25%;
+    padding: 0;
+    position: relative;
+    left: 0;
+    top: 0;
+    background: rgb(75, 75, 75);
+    background-image: var(--bg-noise);
+    box-shadow: inset 0 0 12px 9px rgb(60, 60, 60);
+    box-sizing: border-box;
+    border: 0.15vw solid rgb(40, 40, 40);
+
+    p {
+      margin: 0;
+    }
+
+    .name {
+      font-size: var(--fs-name);
+      color: white;
+      position: absolute;
+      left: 45%;
+      top: 15%;
+      border-bottom: 2px solid white;
+      width: 50%;
+      filter: drop-shadow(0 0 6px black);
+    }
+
+    .threat {
+      width: 1.5vw;
+      position: absolute;
+      right: 5%;
+      top: 12%;
+      border-radius: 20% 0% 20% 0%;
+      filter: drop-shadow(0 0 6px black);
+    }
+
+    .healthPie {
+      width: 30%;
+      height: 60%;
+      border-radius: 50%;
+      position: absolute;
+      left: 10%;
+      top: 10%;
+      background: conic-gradient(black 0 var(--value), var(--health-color) 0);
+      box-shadow: inset 0px 0px 5px 3px var(--health-dark);
+      border: 0.2vw solid grey;
+      text-align: center;
+      z-index: 2;
+
+      .image {    
+        position: absolute;
+        left: 10%;
+        top: 10%;
+        width: 80%;
+        height: 80%;
+        box-sizing: border-box;
+        border: 0.15vw solid silver;
+        border-radius: 50%;
+        background: black;
+        z-index: 2;
+      }
+
+      .hpNumber {
+        color: white;
+        font-size: var(--fs-num);
+        position: absolute;
+        left: 50%;
+        bottom: -30%;
+        transform: translateX(-50%);
+        background: var(--health-color);
+        box-shadow: inset 0px 0px 5px 3px var(--health-dark);
+        z-index: 1;
+        border-radius: 10%;
+        text-align: center;
+        width: 80%;
+      }
+    }
+  }
+}

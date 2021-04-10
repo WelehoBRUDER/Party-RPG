@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style/variables.css">
+  <link rel="stylesheet" href="style/map.css">
+  <link rel="stylesheet" href="style/main.css">
+  <title>PARTY/DUNGEON CRAWLER RPG</title>
+</head>
+<body>
+  <div class="frame">
+    <div class="partyBar sideBar">
+      <div class="partyContainer"></div>
+    </div>
+    <div class="textMap">
+      <canvas class="gameCanvas" width="1444" height="1080"></canvas>
+      <div class="gameFrame"></div>
+    </div>
+    <div class="actionsContainer"></div>
+    <div class="infoBar sideBar"></div>
+    <div class="textBox hidden">
+      <p>Hello, this is simply a test message, not actual info</p>
+    </div>
+  </div>
+</body>
+</html>
+
+<!-- IMAGES FOR CANVAS -->
+<img src="gfx/icons/player_filler.png" alt="" class="playerImg canvasImage">
+<img src="gfx/icons/crossed-swords.png" alt="" class="enemyImg canvasImage">
+
+<script src="script/character.js"></script>
+<script src="script/player.js"></script>
+<script src="script/enemy.js"></script>
+<script src="script/battles.js"></script>
+<script src="script/maps.js"></script>
+<script src="script/combat.js"></script>
+<script src="script/update.js"></script>
+<script src="script/hotkeys.js"></script>

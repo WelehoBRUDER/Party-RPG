@@ -1,0 +1,49 @@
+body {
+  background: rgb(70, 70, 70);
+  background-image: url(../gfx/menu/bg_default.png);
+  background-size: cover;
+}
+
+.container {
+  width: 1444px;
+  height: 1080px;
+  border: 20px solid silver;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+
+  .editorArea {
+    background: black;
+  }
+}
+
+.infoText {
+  width: 400px;
+  height: 800px;
+  position: absolute;
+  right: 20px;
+  top: 50px;
+
+  p {
+    color: white;
+    font-size: 24px;
+    margin: 0px;
+    white-space: pre-line
+  }
+
+  .link {
+    color: rgb(23, 181, 202);
+    font-size: 26px;
+    margin-top: 10px;
+    user-select: none;
+    cursor: pointer;
+  }
+
+  .newMap {
+    color: rgb(241, 10, 10);
+    font-size: 32px;
+  }
+}
