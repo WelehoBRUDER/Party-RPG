@@ -5,21 +5,21 @@ function update() {
   const partyContainer = document.querySelector(".partyContainer")
   partyContainer.textContent = "";
   partyContainer.append(characterPortrait(playerCharacter));
-  playerCharacter.party.forEach(comp=>{partyContainer.append(characterPortrait(comp))});
+  playerCharacter.party.forEach(comp => { partyContainer.append(characterPortrait(comp)) });
 
   function characterPortrait(char) {
     const portrait = document.createElement("div");
     portrait.classList = "characterPortrait";
     portrait.innerHTML = `
       <p class="name">${char.name}</p>
-      <img class="threat" src="../gfx/icons/danger.png" style="background: rgb(212, ${char.threatColor()}, 8)"></p>
+      <img class="threat" src="gfx/icons/danger.png" style="background: rgb(212, ${char.threatColor()}, 8)"></p>
       <div class="healthPie" style="--value: ${100 - char.hpRemaining()}%">
         <img class="image" src="${char.img}"></img>
         <span class="hpNumber">${char.baseStats.hp}</span>
       </div>
     `;
     return portrait;
-  } 
+  }
 }
 
 function Game(main) {
@@ -29,8 +29,8 @@ function Game(main) {
   this.cantMove = main.cantMove || false;
 
   function _enemy_respawn_timers(timers) {
-    Object.entries(timers).forEach(timer=>{
-      if(timer[1] > battles[timer[0]].respawn_timer) timer[1] = battles[timer[0]].respawn_timer;
+    Object.entries(timers).forEach(timer => {
+      if (timer[1] > battles[timer[0]].respawn_timer) timer[1] = battles[timer[0]].respawn_timer;
     });
   }
 }
@@ -46,7 +46,7 @@ const textBox = document.querySelector(".textBox");
 
 function outputCharacter(char) {
   let container;
-  if(!gameFrame.querySelector(".por-container")) {
+  if (!gameFrame.querySelector(".por-container")) {
     container = document.createElement("div");
     container.classList = "por-container";
     gameFrame.append(container);
@@ -63,7 +63,7 @@ function outputCharacter(char) {
   container.append(porFrame);
 }
 
-function outputText(txt, textClass="regular_text") {
+function outputText(txt, textClass = "regular_text") {
   gameFrame.innerHTML += `
     <p class="${textClass}">
     ${txt}
@@ -76,20 +76,20 @@ function clearText() {
 }
 
 function hoverable(element, hover) {
-  element.addEventListener("mouseenter", e=>createHover(element, hover));
-  element.addEventListener("mouseleave", e=>clearHover());
+  element.addEventListener("mouseenter", e => createHover(element, hover));
+  element.addEventListener("mouseleave", e => clearHover());
 }
 
 function createHover(start, hover) {
   try {
     textBox.classList.remove("hidden");
-  } catch {};
+  } catch { };
   textBox.textContent = hover;
   const _width = window.innerWidth;
   const _height = window.innerHeight;
   const elem = start.getBoundingClientRect();
   const left = elem.x / _width * 100;
-  const top =  elem.y / _height * 53;
+  const top = elem.y / _height * 53;
   console.log(start.getBoundingClientRect());
   console.log(`left: ${left}% top: ${top}%`);
   textBox.style.left = `${left - (elem.width / _width * 100) / 2}%`;
@@ -98,9 +98,26 @@ function createHover(start, hover) {
   // textBox.style.top = `${start.getBoundingClientRect().y - start.getBoundingClientRect().height - 10}px`;
 }
 
+function outputChoice(text, action) {
+  gameFrame.innerHTML += `
+    <p class="choice" onclick="${action}">
+    ${text}
+    </p>
+  `;
+}
+
 function clearHover() {
   textBox.textContent = "";
   textBox.classList.add("hidden");
+}
+
+function retreat() {
+  let old = playerCharacter.location;
+  playerCharacter.location = playerCharacter.oldLocation;
+  playerCharacter.oldLocation = old;
+  game.cantMove = false;
+  generateMap(maps[playerCharacter.map]);
+  clearText();
 }
 
 update();

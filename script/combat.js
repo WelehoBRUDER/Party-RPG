@@ -7,5 +7,6 @@ function combatEncounter(battle) {
   battle.enemies.forEach(en=>{
     outputCharacter(en);
   });
+  outputChoice("Retreat", 'e=>retreat()');
   
 }
