@@ -3,15 +3,9 @@ const battles = {
     id: "goblin_enc_1",
     name: "Lone Gobbo",
     enemies: [
-      new Enemy(enemies.gobbo),
-      new Enemy(enemies.gobbo),
-      new Enemy(enemies.gobbo),
-      new Enemy(enemies.gobbo),
-      new Enemy(enemies.gobbo)
+      new Enemy({...enemies.gobbo, level: 100, name: "Gobbo Targ"}),
     ],
     respawn_timer: 1440, // This is in minutes, 24 hours,
-    text: ()=>{
-      return `You encounter a lone gobbo, who immediately screeches at you.`
-    }
+    text: `<f>1vw<f>You encounter a lone gobbo, who immediately screeches at you.`,
   }
 }

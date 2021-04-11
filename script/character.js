@@ -1,22 +1,60 @@
+function battleClass(base) {
+  this.id = base.id;
+  this.name = base.name;
+  const defaultClass = classes[this.id];
+
+  this.maxHp = defaultClass.maxHp;
+  this.atk = defaultClass.atk;
+  this.def = defaultClass.def;
+}
+
+
+const classes = {
+  commoner: {
+    id: "commoner",
+    name: "Commoner",
+    maxHp: 40,
+    atk: 5,
+    def: 5
+  },
+  fighter: {
+    id: "fighter",
+    name: "Fighter",
+    maxHp: 124,
+    atk: 12,
+    def: 8
+  },
+  goblin: {
+    id: "goblin",
+    name: "Goblin",
+    maxHp: 28,
+    atk: 3,
+    def: 2
+  }
+}
+
 function Character(base) {
   this.id = base.id;
   this.name = base.name;
-  this.baseStats = new Stats(base.baseStats ?? {});
+  this.level = base.level || 1;
+  this.class = base.class || new battleClass(classes.commoner);
+  this.baseStats = new Stats(base.baseStats ?? {}, this);
   this.baseResistances = new Resistances(base.baseResistances ?? {});
   this.statModifiers = base.statModifiers || [];
-  this.level = base.level || 1;
   this.img = base.img || "gfx/portraits/missing.png";
+  this.color = base.color ?? "rgb(255, 255, 255)";
+  this.weapon = base.weapon ?? new Weapon(eq.wooden_stick);
 
-  function Stats(stat) {
-    this.atk = stat.atk || 10;
-    this.def = stat.def || 5;
-    this.speed = stat.speed || 50;
-    this.maxHp = stat.maxHp || 500;
-    this.hp = stat.hp || 500;
-    this.acc = stat.acc || 10;
-    this.dodge = stat.dodge || 5;
-    this.critRate = stat.critRate || 5;
-    this.critDamage = stat.critDamage || 50;
+  function Stats(stat, _base) {
+    this.atk = (stat.atk || 40);
+    this.def = (stat.def || 10);
+    this.speed = (stat.speed || 50);
+    this.maxHp = (stat.maxHp || 500);
+    this.hp = Math.max((stat.hp || 500), 0);
+    this.acc = (stat.acc || 10);
+    this.dodge = (stat.dodge || 5);
+    this.critRate = (stat.critRate || 5);
+    this.critDamage = (stat.critDamage || 50);
   }
 
   function Resistances(resist) {
@@ -45,7 +83,8 @@ function Character(base) {
   this.stats = () => {
     let statObj = {};
     Object.entries(this.baseStats).forEach(stat => {
-      const { v: val, m: mod } = getModifiers(this, stat[0]);
+      let { v: val, m: mod } = getModifiers(this, stat[0]);
+      if(this.class[stat[0]]) val += this.class[stat[0]] * this.level;
       statObj[stat[0]] = Math.round((this.baseStats[stat[0]] + val) * mod);
     });
     return statObj;
@@ -53,7 +92,13 @@ function Character(base) {
 
   this.hpRemaining = () => {
     return this.baseStats.hp / this.stats().maxHp * 100;
+  };
+
+  this.isAlive = () => {
+    return this.baseStats.hp > 0;
   }
+
+  this.heal = () => {this.baseStats.hp = this.stats().maxHp};
 
   this.resistances = () => {
     let resistObj = {};
@@ -84,11 +129,18 @@ function Character(base) {
       });
       return highest;
     }
+    else {
+      let highest = this.threatLevel();
+      combat.enemies.forEach(char=>{
+        char.threatLevel() > highest ? highest = char.threatLevel() : "";
+      });
+      return highest;
+    }
   }
 
   this.threatLevel = () => {
     const {v: val, m: mod} = getModifiers(this, "threat");
-    return Math.round((50 + val) * mod);
+    return Math.round((50 + val + this.level) * mod);
   };
 
   this.threatColor = () => {
@@ -98,6 +150,49 @@ function Character(base) {
     else {
       return Math.round(min * (this.highestThreat() / this.threatLevel()));
     }
+  };
+
+  this.targeting = () => {
+    if(this.enemy) {
+      let targets = [];
+      if(playerCharacter.isAlive()) targets.push({...playerCharacter});
+      playerCharacter.party.forEach(comp=>{if(comp.isAlive()) targets.push({...comp})});
+      let target;
+      let max = 0;
+      for(let i = 0; i<targets.length; i++) {
+        if(targets[i].baseStats.hp <= 0) continue;
+        targets[i].threatChance = 0;
+        if(targets[i-1]) targets[i].threatChance = targets[i-1].threatChance;
+        else targets[i].threatChance = 0;
+        targets[i].threatChance += targets[i].threatLevel();
+        max = targets[i].threatChance;
+      }
+      let value = Math.floor(random(max));
+     for(let targ of targets) {if(targ.threatChance >= value) { target = targ; break;}};
+      return target;
+    } else {
+      let targets = [];
+      combat.enemies.forEach(enemy=>{if(enemy.isAlive()) targets.push({...enemy})});
+      let target;
+      let max = 0;
+      for(let i = 0; i<targets.length; i++) {
+        if(targets[i].baseStats.hp <= 0) continue;
+        targets[i].threatChance = 0;
+        if(targets[i-1]) targets[i].threatChance = targets[i-1].threatChance;
+        else targets[i].threatChance = 0;
+        targets[i].threatChance += targets[i].threatLevel();
+        max = targets[i].threatChance;
+      }
+      let value = Math.floor(random(max));
+      for(let targ of targets) {if(targ.threatChance >= value) { target = targ; break;}};
+      return target;
+    }
+  };
+
+  this.decideMove = () => {
+    // THIS IS THE CHARACTER AI //
+    // WIP //
+    combat.round.push({actor: this, speed: this.stats().speed, target: this.targeting(), action: _attack}); // just randomly attacks an enemy
   }
 }
 

@@ -2,10 +2,14 @@ function update() {
   // THIS FUNCTION IS CALLED AFTER EVERY ACTION
 
   // Create player & party portraits
-  const partyContainer = document.querySelector(".partyContainer")
+  removeDeadCharacters();
+  const partyContainer = document.querySelector(".partyBar .partyContainer");
+  const foeContainer = document.querySelector(".infoBar .partyContainer");
   partyContainer.textContent = "";
+  foeContainer.textContent = "";
   partyContainer.append(characterPortrait(playerCharacter));
   playerCharacter.party.forEach(comp => { partyContainer.append(characterPortrait(comp)) });
+  combat.enemies.forEach(en=>{foeContainer.append(characterPortrait(en))});
 
   function characterPortrait(char) {
     const portrait = document.createElement("div");
@@ -18,6 +22,7 @@ function update() {
         <span class="hpNumber">${char.baseStats.hp}</span>
       </div>
     `;
+    hoverable(portrait.querySelector(".threat"), `${char.threatLevel()} Threat`);
     return portrait;
   }
 }
@@ -27,6 +32,7 @@ function Game(main) {
   this.flags = main.flags ?? {};
   this.enemy_respawn_timers = new _enemy_respawn_timers(main.enemy_respawn_timers);
   this.cantMove = main.cantMove || false;
+  this.companion_ai = main.companion_ai || true;
 
   function _enemy_respawn_timers(timers) {
     Object.entries(timers).forEach(timer => {
@@ -44,31 +50,18 @@ let game = new Game({
 const gameFrame = document.querySelector(".gameFrame");
 const textBox = document.querySelector(".textBox");
 
-function outputCharacter(char) {
-  let container;
-  if (!gameFrame.querySelector(".por-container")) {
-    container = document.createElement("div");
-    container.classList = "por-container";
-    gameFrame.append(container);
-  }
-  else container = gameFrame.querySelector(".por-container");
+const random = (max, min=0) => (Math.random() * (max - min) + min);
+
+function portraitFrame(char) {
   const porFrame = document.createElement("div");
   porFrame.classList = "portraitFrame";
-  hoverable(porFrame, "This is a test iwejfoj oj ifdj iqo hjiq hfiou huiqfh qufg q gfu  ad wdwq qwd qw dw qwdfwqf wf sf qwfqwf qwf32 efsa f weqfsa fq wfq fwe fe fef qwf wq fwq");
-  porFrame.innerHTML += `
+  porFrame.innerHTML = `
     <p class="porTitle">${char.name}</p>
     <img src="${char.img}" class="porImg">
     <p class="porLvl">Level ${char.level}</p>
   `;
-  container.append(porFrame);
-}
-
-function outputText(txt, textClass = "regular_text") {
-  gameFrame.innerHTML += `
-    <p class="${textClass}">
-    ${txt}
-    </p>
-  `;
+  hoverable(porFrame, char.desc ?? "No desc :)");
+  return porFrame;
 }
 
 function clearText() {
@@ -76,39 +69,56 @@ function clearText() {
 }
 
 function hoverable(element, hover) {
-  element.addEventListener("mouseenter", e => createHover(element, hover));
-  element.addEventListener("mouseleave", e => clearHover());
+  element.addEventListener("mouseenter", e=>createHover(element, hover));
+  element.addEventListener("mouseleave", e=>clearHover());
 }
 
 function createHover(start, hover) {
   try {
     textBox.classList.remove("hidden");
-  } catch { };
-  textBox.textContent = hover;
+  } catch {};
+  const frameTop = document.querySelector("div.frame").getBoundingClientRect().top;
+  textBox.textContent = "";
+  textBox.append(textSyntax(hover));
   const _width = window.innerWidth;
   const _height = window.innerHeight;
   const elem = start.getBoundingClientRect();
-  const left = elem.x / _width * 100;
-  const top = elem.y / _height * 53;
-  console.log(start.getBoundingClientRect());
-  console.log(`left: ${left}% top: ${top}%`);
-  textBox.style.left = `${left - (elem.width / _width * 100) / 2}%`;
-  textBox.style.top = `${top - (elem.height / _height * 53) / 2}%`;
+  const left = elem.x / _width * 100; //                                  offset pixelejä
+  const top = elem.y - frameTop - textBox.getBoundingClientRect().height - 10;
+  // console.log(start.getBoundingClientRect());
+  // console.log(`left: ${left}% top: ${top}%`);
+
+
+
+  console.log(start.getBoundingClientRect().top)
+  textBox.style.left = `${Math.min(left - (elem.width / _width * 100) / 2, 95)}%`;
+  textBox.style.top = `${Math.max(top, 5)}px`;
   // textBox.style.left = `${(start.getBoundingClientRect().x - start.getBoundingClientRect().width / 2) + textBox.getBoundingClientRect().width / 2 + (start.getBoundingClientRect().width - textBox.getBoundingClientRect().width) / 2}px`;
   // textBox.style.top = `${start.getBoundingClientRect().y - start.getBoundingClientRect().height - 10}px`;
 }
 
-function outputChoice(text, action) {
-  gameFrame.innerHTML += `
-    <p class="choice" onclick="${action}">
-    ${text}
-    </p>
-  `;
+function showText() {
+  try {
+    gameFrame.classList.remove("hidden");
+  } catch {};
 }
+
+// function outputChoice(text, action) {
+//   gameFrame.innerHTML += `
+//     <p class="choice" onclick="${action}">
+//     ${text}
+//     </p>
+//   `;
+// }
 
 function clearHover() {
   textBox.textContent = "";
   textBox.classList.add("hidden");
+}
+
+function hideText() {
+  gameFrame.textContent = "";
+  gameFrame.classList.add("hidden");
 }
 
 function retreat() {
@@ -119,5 +129,9 @@ function retreat() {
   generateMap(maps[playerCharacter.map]);
   clearText();
 }
+
+function removeDeadCharacters() {}
+
+hideText();
 
 update();

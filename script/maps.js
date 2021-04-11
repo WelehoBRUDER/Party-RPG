@@ -120,7 +120,8 @@ const maps = {
       {
         index: 1,
         loc: { x: 4, y: -1 },
-        connect: { west: 0, east: 2, }
+        connect: { west: 0, east: 2, },
+        battle: battles.goblin_enc_1
       },
       {
         index: 2,
@@ -136,7 +137,6 @@ const maps = {
         index: 4,
         loc: { x: 14, y: 1 },
         connect: { west: 3, east: 5, },
-        battle: battles.goblin_enc_1
       },
       {
         index: 5,

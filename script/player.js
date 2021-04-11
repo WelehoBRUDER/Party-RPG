@@ -9,6 +9,7 @@ class Player extends Character {
     this.location = test.location;
     this.oldLocation = test.oldLocation;
     this.map = test.map;
+
     this.move = (dir) => {
       if(moveDelay || game.cantMove) return;
       const currentTile = maps[this.map].tiles[this.location];
@@ -16,10 +17,19 @@ class Player extends Character {
         this.oldLocation = this.location;
         this.location = currentTile.connect[dir];
         moveDelay = true;
-        setTimeout(e=>{moveDelay = false}, 450);
+        setTimeout(e=>{moveDelay = false}, 500);
         generateMap(maps[this.map]);
       }
-    }
+    };
+
+    this.retreat = () => {
+      let old = this.location;
+      this.location = this.oldLocation;
+      this.oldLocation = old;
+      setTimeout(e=>game.cantMove = false, 500);
+      generateMap(maps[playerCharacter.map]);
+      hideText();
+    };
   }
 };
 
@@ -36,6 +46,7 @@ let companions = {
   doldre: {
     id: "doldre",
     name: "Ser Doldrey",
+    class: new battleClass(classes.fighter),
     statModifiers: [
       {
         effects: {
@@ -43,7 +54,9 @@ let companions = {
           maxHpP: 75
         }
       }
-    ]
+    ],
+    color: "rgb(214, 107, 30)",
+    level: 100
   }
 }
 
@@ -58,5 +71,10 @@ let playerCharacter = new Player({
   ],
   location: 0,
   oldLocation: 0,
-  map: "super_fun_map"
+  map: "super_fun_map",
+  color: "rgb(3, 190, 252)",
+  level: 1
 });
+
+playerCharacter.heal();
+playerCharacter.party.forEach(chr=>{chr.heal()});

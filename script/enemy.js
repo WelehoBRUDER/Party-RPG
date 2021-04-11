@@ -1,10 +1,12 @@
 class Enemy extends Character {
-  constructor(test) {
-    super(test);
-    this.unique = "TEST 2";
+  constructor(base) {
+    super(base);
     this.enemy = true;
+    this.desc = base.desc ?? generic_desc
   }
 }
+
+const generic_desc = "This is a generic enemy description. This is a hostile character, be *very* afraid.";
 
 let enemyCharacter = new Enemy({
   id: "enemy",
@@ -13,11 +15,14 @@ let enemyCharacter = new Enemy({
 
 const enemies = {
   gobbo: {
+    id: "gobbo",
     name: "Gobbo",
     img: "gfx/portraits/goblin.png",
+    class: new battleClass(classes.goblin),
+    color: "rgb(72, 143, 64)",
     baseStats: {
-      atk: 5,
-      def: 3,
+      atk: 48,
+      def: 8,
       speed: 60,
       maxHp: 150,
       hp: 150,
@@ -33,6 +38,7 @@ const enemies = {
       nature: 5,
       shock: 0,
       wind: 0
-    }
+    },
+    desc: "Gobbos are weak but numerous creatures that love nothing more than ruining your perfectly good day. Give em' hell!"
   }
 }
