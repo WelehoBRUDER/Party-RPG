@@ -37,7 +37,7 @@ class Companion extends Character {
   constructor(test) {
     super(test);
     this.unique = "TEST";
-    this.companion = true;
+    this.companion = false;
     this.img = test.img ?? "gfx/portraits/missing.png";
   }
 }
@@ -46,17 +46,21 @@ let companions = {
   doldre: {
     id: "doldre",
     name: "Ser Doldrey",
-    class: new battleClass(classes.fighter),
-    statModifiers: [
-      {
-        effects: {
-          threatV: 25,
-          maxHpP: 75
-        }
-      }
-    ],
+    race: new race(races.human),
+    // statModifiers: [
+    //   {
+    //     effects: {
+    //       threatV: 25,
+    //       maxHpP: 75
+    //     }
+    //   }
+    // ],
+    baseStats: {
+      atk: 5,
+      def: 5
+    },
     color: "rgb(214, 107, 30)",
-    level: 100
+    level: 1
   }
 }
 
@@ -69,6 +73,10 @@ let playerCharacter = new Player({
   party: [
     new Companion(companions.doldre)
   ],
+  baseStats: {
+    atk: 5,
+    def: 5
+  },
   location: 0,
   oldLocation: 0,
   map: "super_fun_map",
@@ -77,4 +85,6 @@ let playerCharacter = new Player({
 });
 
 playerCharacter.heal();
+playerCharacter.recover();
 playerCharacter.party.forEach(chr=>{chr.heal()});
+playerCharacter.party.forEach(chr=>{chr.recover()});

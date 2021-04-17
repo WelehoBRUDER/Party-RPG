@@ -29,26 +29,53 @@ function combatEncounter(battle) {
 }
 
 let combat = {
-  enemies: [],
+  characters: [],
   battle: {},
   round: [],
-  actor: {},
+  actor: "",
+  index: 0,
+  playerAct: false,
   buttons: document.querySelector(".actionsContainer"),
 };
 
+function sortSpeed(a, b) {
+  // Use toUpperCase() to ignore character casing
+  const aVal = a.stats().speed;
+  const bVal = b.stats().speed;
+
+  let comparison = 0;
+  if (aVal < bVal) {
+    comparison = 1;
+  } else if (aVal > bVal) {
+    comparison = -1;
+  }
+  return comparison;
+}
+
 function startBattle() {
-  combat.enemies = [];
+  combat.characters = [];
   combat.battle.enemies.forEach(en=>{
     en.heal();
-    combat.enemies.push(en);
+    en.recover();
+    combat.characters.push({...en});
   });
+  combat.characters.push({...playerCharacter});
+  playerCharacter.party.forEach(chr=>combat.characters.push(chr));
   combat.round = [];
-  combat.actor = playerCharacter;
+  //combat.actor = playerCharacter;
+  mainButtons();
+  combat.characters.sort(sortSpeed);
+  clearText();
+  update();
+  combat.playerAct = false;
+  combat.index = 0;
+  combat.characters[combat.index].turn();
+};
+
+function mainButtons() {
   combat.buttons.innerHTML = `
     <button onclick="combatAttack()">Attack</button>
   `;
-  clearText();
-  update();
 };
 
 function calculateDamage(dmg, def, res) {
@@ -56,26 +83,18 @@ function calculateDamage(dmg, def, res) {
 }
 
 function combatAttack() {
+  if(!combat.playerAct) return;
   combat.buttons.textContent = "";
-  combat.enemies.forEach(enemy=>{
-   if(enemy.isAlive()) combat.buttons.innerHTML += `<button onclick="attackFoe('${enemy.name}')">${enemy.name}</button>`
+  combat.characters.forEach(enemy=>{
+   if(enemy.isAlive() && enemy.enemy) combat.buttons.innerHTML += `<button onclick="attackFoe('${enemy.name}', '${combat.actor}')">${enemy.name}</button>`
   });
-  combat.buttons.innerHTML += "<button onclick='cancelAction()'>Cancel</button>"
+  combat.buttons.innerHTML += "<button onclick='mainButtons()'>Cancel</button>"
 }
 
-function attackFoe(name) {
-  let target = combat.enemies.find(en=>en.name == name);
-  combat.round.push({actor: combat.actor, speed: combat.actor.stats().speed, target: target, action: _attack});
-  //if(combat.actor == playerCharacter) combat.actor = playerCharacter.party[0];
-  if(game.companion_ai) {
-    playerCharacter.party.forEach(comp=>{
-      comp.decideMove();
-    });
-    combat.enemies.forEach(en=>{
-      en.decideMove();
-    });
-    calculateRound();
-  }
+function attackFoe(enemy_name, actor_id) {
+  let target = combat.characters.find(en=>en.name == enemy_name);
+  let actor = combat.characters.find(ac=>ac.id == actor_id);
+  _attack(actor, target);
 }
 
 function _attack(actor, target) {
@@ -84,14 +103,42 @@ function _attack(actor, target) {
   let res = target.resistances().physical / 100;
   let dmg = calculateDamage(atk, def, res);
   console.log(`${actor.name} attacks ${target.name} for ${dmg} damage!`);
-  if(target.enemy) combat.enemies.find(en=>en.name == target.name).baseStats.hp -= dmg;
+  if(target.enemy) combat.characters.find(en=>en.name == target.name).baseStats.hp -= dmg;
   else if(target.player) playerCharacter.baseStats.hp -= dmg;
   else playerCharacter.party.find(char=>char.id == target.id).baseStats.hp -= dmg;
   gameFrame.append(textSyntax(`
     ${pre_frame}${actor_combat_text(actor)} attacks ${actor_combat_text(target)} dealing ${dmg}<c>${$dmg}<c> damage.
   `));
   gameFrame.scrollTo(0, gameFrame.scrollHeight);
+  nextTurn();
   update();
+}
+
+function nextTurn() {
+  mainButtons();
+  combat.characters.sort(sortSpeed);
+  combat.index++;
+  if(combat.index > combat.characters.length-1) {
+    combat.index = 0;
+    clickNext();
+    return;
+  };
+  if(!combat.characters[combat.index]?.isAlive) nextTurn();
+  combat.characters[combat.index].turn();
+}
+
+function clickNext() {
+  combat.buttons.innerHTML = `
+  <button onclick="newTurn()">Next</button>
+`;
+}
+
+function newTurn() {
+  clearText();
+  mainButtons();
+  combat.characters.sort(sortSpeed);
+  combat.index = 0;
+  combat.characters[combat.index].turn();
 }
 
 const actor_combat_text = (actor) => {
@@ -106,4 +153,4 @@ function calculateRound() {
     r.action(r.actor, r.target);
   });
   combat.round = [];
-}
+};

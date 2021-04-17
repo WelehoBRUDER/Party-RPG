@@ -9,19 +9,23 @@ function update() {
   foeContainer.textContent = "";
   partyContainer.append(characterPortrait(playerCharacter));
   playerCharacter.party.forEach(comp => { partyContainer.append(characterPortrait(comp)) });
-  combat.enemies.forEach(en=>{foeContainer.append(characterPortrait(en))});
-
+  combat.characters.forEach(en=>{if(en.enemy) foeContainer.append(characterPortrait(en))});
   function characterPortrait(char) {
     const portrait = document.createElement("div");
     portrait.classList = "characterPortrait";
     portrait.innerHTML = `
       <p class="name">${char.name}</p>
       <img class="threat" src="gfx/icons/danger.png" style="background: rgb(212, ${char.threatColor()}, 8)"></p>
+      <div class="energyContainer">
+        <div class="energyPie" style="--value: ${100 - char.epRemaining()}%"></div>
+        <span class="epNumber">${char.baseStats.ep}</span>
+      </div>
       <div class="healthPie" style="--value: ${100 - char.hpRemaining()}%">
         <img class="image" src="${char.img}"></img>
         <span class="hpNumber">${char.baseStats.hp}</span>
       </div>
     `;
+    if(combat.actor == char.id) portrait.style.borderColor = "gold";
     hoverable(portrait.querySelector(".threat"), `${char.threatLevel()} Threat`);
     return portrait;
   }
@@ -135,3 +139,6 @@ function removeDeadCharacters() {}
 hideText();
 
 update();
+
+combatEncounter(battles.goblin_enc_1);
+startBattle();

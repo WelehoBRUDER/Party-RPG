@@ -1,35 +1,33 @@
-function battleClass(base) {
+function race(base) {
   this.id = base.id;
   this.name = base.name;
-  const defaultClass = classes[this.id];
+  const defaultRace = races[this.id];
 
-  this.maxHp = defaultClass.maxHp;
-  this.atk = defaultClass.atk;
-  this.def = defaultClass.def;
+  this.maxHp = defaultRace.maxHp || 0;
+  this.atk = defaultRace.atk || 0;
+  this.def = defaultRace.def || 0;
+  this.speed = defaultRace.speed || 0;
 }
 
 
-const classes = {
-  commoner: {
-    id: "commoner",
-    name: "Commoner",
-    maxHp: 40,
-    atk: 5,
-    def: 5
-  },
-  fighter: {
-    id: "fighter",
-    name: "Fighter",
-    maxHp: 124,
-    atk: 12,
-    def: 8
+const races = {
+  human: {
+    id: "human",
+    name: "Human",
+    maxHp: 20,
+    maxEp: 5,
+    atk: 2,
+    def: 2,
+    speed: 2
   },
   goblin: {
     id: "goblin",
     name: "Goblin",
-    maxHp: 28,
+    maxHp: 18,
+    maxEp: 2,
     atk: 3,
-    def: 2
+    def: 1,
+    speed: 3
   }
 }
 
@@ -37,20 +35,27 @@ function Character(base) {
   this.id = base.id;
   this.name = base.name;
   this.level = base.level || 1;
-  this.class = base.class || new battleClass(classes.commoner);
+  this.race = base.race || new race(races.human);
   this.baseStats = new Stats(base.baseStats ?? {}, this);
   this.baseResistances = new Resistances(base.baseResistances ?? {});
   this.statModifiers = base.statModifiers || [];
   this.img = base.img || "gfx/portraits/missing.png";
   this.color = base.color ?? "rgb(255, 255, 255)";
   this.weapon = base.weapon ?? new Weapon(eq.wooden_stick);
+  this.ai = new ai(base.ai ?? {});
 
   function Stats(stat, _base) {
-    this.atk = (stat.atk || 40);
-    this.def = (stat.def || 10);
+    this.str = stat.str || 5;
+    this.mag = stat.mag || 5;
+    this.agi = stat.agi || 5;
+    this.con = stat.con || 5;
+    this.atk = (stat.atk || 0);
+    this.def = (stat.def || 0);
     this.speed = (stat.speed || 50);
-    this.maxHp = (stat.maxHp || 500);
-    this.hp = Math.max((stat.hp || 500), 0);
+    this.maxHp = (stat.maxHp || 0);
+    this.maxEp = (stat.maxEp || 0);
+    this.hp = Math.max((stat.hp || 0), 0);
+    this.ep = Math.max((stat.ep || 0), 0);
     this.acc = (stat.acc || 10);
     this.dodge = (stat.dodge || 5);
     this.critRate = (stat.critRate || 5);
@@ -64,6 +69,15 @@ function Character(base) {
     this.nature = resist.nature || 0;
     this.shock = resist.shock || 0;
     this.wind = resist.wind || 0;
+  }
+
+  function ai(ai) {
+    this.attack = ai.attack || 10;
+    this.defend = ai.defend || 10;
+    this.healSelf = ai.healSelf || 10;
+    this.healFriend = ai.healFriend || 10;
+    this.buffSelf = ai.buffSelf || 10;
+    this.buffFriend = ai.buffFriend || 10;
   }
 
   function getModifiers(char, stat) {
@@ -84,9 +98,14 @@ function Character(base) {
     let statObj = {};
     Object.entries(this.baseStats).forEach(stat => {
       let { v: val, m: mod } = getModifiers(this, stat[0]);
-      if(this.class[stat[0]]) val += this.class[stat[0]] * this.level;
+      if(this.race[stat[0]]) val += this.race[stat[0]] * this.level;
+      if(stat[0] == "maxHp") val += statObj.con * 5;
+      else if(stat[0] == "maxEp") val += statObj.mag * 2 + statObj.con;
+      else if(stat[0] == "speed") val += statObj.agi;
+      else if(stat[0] == "def") val += statObj.agi * 2; 
       statObj[stat[0]] = Math.round((this.baseStats[stat[0]] + val) * mod);
     });
+    //statObj.maxHp += 5 * statObj.con;
     return statObj;
   };
 
@@ -94,11 +113,16 @@ function Character(base) {
     return this.baseStats.hp / this.stats().maxHp * 100;
   };
 
+  this.epRemaining = () => {
+    return this.baseStats.ep / this.stats().maxEp * 100;
+  }
+
   this.isAlive = () => {
     return this.baseStats.hp > 0;
   }
 
   this.heal = () => {this.baseStats.hp = this.stats().maxHp};
+  this.recover = () => {this.baseStats.ep = this.stats().maxEp};
 
   this.resistances = () => {
     let resistObj = {};
@@ -111,7 +135,8 @@ function Character(base) {
 
   this.damageBuffs = () => {
     let dmgObj = {};
-    dmgObj.physical = getModifiers(this, "physicalDmg").m;
+    dmgObj.physical = getModifiers(this, "physicalDmg").m + this.stats().str/100;
+    dmgObj.magical = getModifiers(this, "magicalDmg").m + this.stats().mag/100;
     dmgObj.fire = getModifiers(this, "fireDmg").m;
     dmgObj.ice = getModifiers(this, "iceDmg").m;
     dmgObj.nature = getModifiers(this, "natureDmg").m;
@@ -131,7 +156,8 @@ function Character(base) {
     }
     else {
       let highest = this.threatLevel();
-      combat.enemies.forEach(char=>{
+      combat.characters.forEach(char=>{
+        if(!char.enemy) return;
         char.threatLevel() > highest ? highest = char.threatLevel() : "";
       });
       return highest;
@@ -152,11 +178,26 @@ function Character(base) {
     }
   };
 
+  this.attack_foe = () => {
+    let target = this.targeting();
+    _attack(this, target);
+  }
+
+  this.turn = () => {
+    if(this.enemy || this.companion) {
+      // For now just attack
+      this.attack_foe();
+    }
+    else {
+      combat.actor = this.id;
+      combat.playerAct = true;
+    }
+  }
+
   this.targeting = () => {
     if(this.enemy) {
       let targets = [];
-      if(playerCharacter.isAlive()) targets.push({...playerCharacter});
-      playerCharacter.party.forEach(comp=>{if(comp.isAlive()) targets.push({...comp})});
+      combat.characters.forEach(char=>{if(char.isAlive() && !char.enemy) targets.push({...char})});
       let target;
       let max = 0;
       for(let i = 0; i<targets.length; i++) {
@@ -172,7 +213,7 @@ function Character(base) {
       return target;
     } else {
       let targets = [];
-      combat.enemies.forEach(enemy=>{if(enemy.isAlive()) targets.push({...enemy})});
+      combat.characters.forEach(enemy=>{if(enemy.isAlive() && enemy.enemy) targets.push({...enemy})});
       let target;
       let max = 0;
       for(let i = 0; i<targets.length; i++) {

@@ -317,6 +317,46 @@ body {
       filter: drop-shadow(0 0 6px black);
     }
 
+    .energyContainer {
+      width: 15%;
+      height: 30%;
+      border-radius: 50%;
+      position: absolute;
+      right: 5%;
+      bottom: 5%;
+      background: black;
+      border: 0.2vw solid rgb(131, 164, 173);
+      text-align: center;
+
+      .energyPie {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        background: var(--energy-color);
+        box-shadow: inset 0px 0px 5px 3px var(--energy-dark);
+        background-image: var(--bg-noise);
+        z-index: 2;
+        clip-path: inset(var(--value) 0 0 0);
+
+      }
+
+      .epNumber {
+        color: white;
+        font-size: var(--fs-name);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateY(-50%) translateX(-50%);
+        text-shadow: 0vw 0vw 0.2vw black;
+        z-index: 3;
+      }
+    }
+
+    
+
     .healthPie {
       width: 30%;
       height: 60%;
