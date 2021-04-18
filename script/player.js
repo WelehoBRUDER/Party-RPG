@@ -59,6 +59,9 @@ let companions = {
       atk: 5,
       def: 5
     },
+    powers: [
+      new first_aid({})
+    ],
     color: "rgb(214, 107, 30)",
     level: 1
   }
@@ -77,6 +80,9 @@ let playerCharacter = new Player({
     atk: 5,
     def: 5
   },
+  powers: [
+    new fireball({})
+  ],
   location: 0,
   oldLocation: 0,
   map: "super_fun_map",

@@ -24,8 +24,14 @@ function update() {
         <img class="image" src="${char.img}"></img>
         <span class="hpNumber">${char.baseStats.hp}</span>
       </div>
+      <div class="statusGrid"></div>
     `;
     if(combat.actor == char.id) portrait.style.borderColor = "gold";
+    for(let i = 0; i < 10; i++) {
+      const gridBox = document.createElement("div");
+      gridBox.classList = "statusBox";
+      portrait.querySelector(".statusGrid").append(gridBox);
+    }
     hoverable(portrait.querySelector(".threat"), `${char.threatLevel()} Threat`);
     return portrait;
   }

@@ -15,6 +15,7 @@ class Weapon extends Equipment {
     const defaultEq = eq[base.id];
     this.atk = defaultEq.atk;
     this.level = base.level;
+    this.action = base.action;
   }
 }
 
@@ -24,6 +25,7 @@ const eq = {
     name: "Wooden Stick",
     type: "weapon",
     atk: 10,
-    level: 1
+    level: 1,
+    action: "canes"
   }
 }

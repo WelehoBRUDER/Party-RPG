@@ -39,6 +39,7 @@ function Character(base) {
   this.baseStats = new Stats(base.baseStats ?? {}, this);
   this.baseResistances = new Resistances(base.baseResistances ?? {});
   this.statModifiers = base.statModifiers || [];
+  this.powers = base.powers || [];
   this.img = base.img || "gfx/portraits/missing.png";
   this.color = base.color ?? "rgb(255, 255, 255)";
   this.weapon = base.weapon ?? new Weapon(eq.wooden_stick);
@@ -64,6 +65,7 @@ function Character(base) {
 
   function Resistances(resist) {
     this.physical = resist.physical || 0;
+    this.magical = resist.magical || 0;
     this.fire = resist.fire || 0;
     this.ice = resist.ice || 0;
     this.nature = resist.nature || 0;
@@ -103,6 +105,7 @@ function Character(base) {
       else if(stat[0] == "maxEp") val += statObj.mag * 2 + statObj.con;
       else if(stat[0] == "speed") val += statObj.agi;
       else if(stat[0] == "def") val += statObj.agi * 2; 
+      if(stat[0] == "atk") val += this.weapon.atk;
       statObj[stat[0]] = Math.round((this.baseStats[stat[0]] + val) * mod);
     });
     //statObj.maxHp += 5 * statObj.con;
@@ -123,6 +126,16 @@ function Character(base) {
 
   this.heal = () => {this.baseStats.hp = this.stats().maxHp};
   this.recover = () => {this.baseStats.ep = this.stats().maxEp};
+
+  this.restore = (amnt) => {
+    this.baseStats.hp += amnt;
+    if(this.baseStats.hp > this.stats().maxHp) this.baseStats.hp = this.stats().maxHp;
+  }
+
+  this.energize = (amnt) => {
+    this.baseStats.ep += amnt;
+    if(this.baseStats.ep > this.stats().maxEp) this.baseStats.ep = this.stats().maxEp;
+  }
 
   this.resistances = () => {
     let resistObj = {};
@@ -145,6 +158,22 @@ function Character(base) {
     dmgObj.heal = getModifiers(this, "healBonus").m;
     return dmgObj;
   };
+
+  this.damage = (dmg) => {
+    // ALL DAMAGE IS LOGGED THROUGH HERE
+    // SO YOU CAN FOR EXAMPLE INCREASE
+    // PERK'S POWER BASED ON DMG OR TIMES HIT
+    this.baseStats.hp -= dmg;
+    if(this.baseStats.hp < 0) this.baseStats.hp = 0;
+    // THIS WON'T UPDATE UNLESS YOU CALL IT.
+  };
+
+  this.drain = (amnt) => {
+    // DRAIN THE CHARACTER'S ENERGY
+    this.baseStats.ep -= amnt;
+    if(this.baseStats.ep < 0) this.baseStats.ep = 0;
+     // THIS WON'T UPDATE UNLESS YOU CALL IT.
+  }
 
   this.highestThreat = () => {
     if(!this.enemy) {
@@ -183,7 +212,13 @@ function Character(base) {
     _attack(this, target);
   }
 
+  this.lowerCDs = () => {
+    this.powers.forEach(pwr=>{pwr.onCooldown > 0 ? pwr.onCooldown-- : pwr.onCooldown = 0;});
+  }
+
   this.turn = () => {
+    if(!this.isAlive()) { nextTurn(); return; }
+    this.lowerCDs();
     if(this.enemy || this.companion) {
       // For now just attack
       this.attack_foe();

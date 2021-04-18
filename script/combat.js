@@ -75,6 +75,8 @@ function startBattle() {
 function mainButtons() {
   combat.buttons.innerHTML = `
     <button onclick="combatAttack()">Attack</button>
+    <button onclick="showPowers()">Powers</button>
+    <button onclick="showSpells()">Spells</button>
   `;
 };
 
@@ -91,6 +93,46 @@ function combatAttack() {
   combat.buttons.innerHTML += "<button onclick='mainButtons()'>Cancel</button>"
 }
 
+function showPowers() {
+  if(!combat.playerAct) return;
+  combat.buttons.textContent = "";
+  let actor = combat.characters[combat.index]
+  actor.powers.forEach(pwr=>{
+   if(!pwr.spell) {
+     const _button = document.createElement("button");
+     _button.textContent = pwr.name;
+     hoverable(_button, pwr.desc(actor));
+     combat.buttons.append(_button);
+     if(pwr.onCooldown > 0 || pwr.energyCost > actor.baseStats.ep) _button.classList = "greyedOut";
+     else  _button.addEventListener("click", e=>showTargets(pwr.id));
+   } 
+  });
+  const button = document.createElement("button");
+  button.addEventListener("click", mainButtons);
+  button.textContent = "Cancel";
+  combat.buttons.append(button);
+};
+
+function showSpells() {
+  if(!combat.playerAct) return;
+  combat.buttons.textContent = "";
+  let actor = combat.characters[combat.index]
+  actor.powers.forEach(pwr=>{
+   if(pwr.spell) {
+     const _button = document.createElement("button");
+     _button.textContent = pwr.name;
+     hoverable(_button, pwr.desc(actor));
+     combat.buttons.append(_button);
+     if(pwr.onCooldown > 0 || pwr.energyCost > actor.baseStats.ep) _button.classList = "greyedOut";
+     else _button.addEventListener("click", e=>showTargets(pwr.id));
+   } 
+  });
+  const button = document.createElement("button");
+  button.addEventListener("click", mainButtons);
+  button.textContent = "Cancel";
+  combat.buttons.append(button);
+};
+
 function attackFoe(enemy_name, actor_id) {
   let target = combat.characters.find(en=>en.name == enemy_name);
   let actor = combat.characters.find(ac=>ac.id == actor_id);
@@ -103,11 +145,11 @@ function _attack(actor, target) {
   let res = target.resistances().physical / 100;
   let dmg = calculateDamage(atk, def, res);
   console.log(`${actor.name} attacks ${target.name} for ${dmg} damage!`);
-  if(target.enemy) combat.characters.find(en=>en.name == target.name).baseStats.hp -= dmg;
-  else if(target.player) playerCharacter.baseStats.hp -= dmg;
-  else playerCharacter.party.find(char=>char.id == target.id).baseStats.hp -= dmg;
+  if(target.enemy) combat.characters.find(en=>en.name == target.name).damage(dmg);
+  else if(target.player) playerCharacter.damage(dmg);
+  else playerCharacter.party.find(char=>char.id == target.id).damage(dmg);
   gameFrame.append(textSyntax(`
-    ${pre_frame}${actor_combat_text(actor)} attacks ${actor_combat_text(target)} dealing ${dmg}<c>${$dmg}<c> damage.
+    ${pre_frame}${actor_combat_text(actor)} ${actor.weapon.action} ${actor_combat_text(target)} with <c>${$itm}<c>${actor.weapon.name}<c>black<c> dealing ${dmg}<c>${$dmg}<c> damage.
   `));
   gameFrame.scrollTo(0, gameFrame.scrollHeight);
   nextTurn();
@@ -116,6 +158,7 @@ function _attack(actor, target) {
 
 function nextTurn() {
   mainButtons();
+  clearHover();
   combat.characters.sort(sortSpeed);
   combat.index++;
   if(combat.index > combat.characters.length-1) {
@@ -131,6 +174,38 @@ function clickNext() {
   combat.buttons.innerHTML = `
   <button onclick="newTurn()">Next</button>
 `;
+}
+
+function showTargets(id) {
+  combat.buttons.textContent = "";
+  clearHover();
+  const actor = combat.characters[combat.index];
+  const power = actor.powers.find(pwr=>pwr.id == id);
+  console.log(power);
+  if(power.targets == "enemy") {
+    combat.characters.forEach(char=>{
+      if(char.enemy && char.isAlive()) {
+        const enemyButton = document.createElement("button");
+        enemyButton.textContent = char.name;
+        enemyButton.addEventListener("click", e=>power.action(actor, char));
+        combat.buttons.append(enemyButton);
+      }
+    });
+  }
+  else if(power.targets == "allies") {
+    combat.characters.forEach(char=>{
+      if((!char.enemy || char.player) && (char.isAlive() || power.resurrect)) {
+        const enemyButton = document.createElement("button");
+        enemyButton.textContent = char.name;
+        enemyButton.addEventListener("click", e=>power.action(actor, char));
+        combat.buttons.append(enemyButton);
+      }
+    });
+  }
+  const button = document.createElement("button");
+  button.addEventListener("click", mainButtons);
+  button.textContent = "Cancel";
+  combat.buttons.append(button);
 }
 
 function newTurn() {

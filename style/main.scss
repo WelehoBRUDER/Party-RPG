@@ -278,6 +278,10 @@ body {
     button:hover {
       filter: brightness(125%);
     }
+
+    .greyedOut {
+      filter: brightness(50%) !important;
+    }
   }
 
   .characterPortrait {
@@ -396,6 +400,21 @@ body {
         border-radius: 10%;
         text-align: center;
         width: 80%;
+      }
+    }
+
+    .statusGrid {
+      display: grid;
+      width: 50%;
+      height: 26.75%;
+      grid-template-columns: repeat(5, 1fr);
+      position: absolute;
+      right: 5%;
+      top: 32.5%;
+
+      .statusBox {
+        background: rgba(60, 60, 60, 0.7);
+        border: 0.1vw dashed silver;
       }
     }
   }
