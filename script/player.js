@@ -37,7 +37,7 @@ class Companion extends Character {
   constructor(test) {
     super(test);
     this.unique = "TEST";
-    this.companion = false;
+    this.companion = true;
     this.img = test.img ?? "gfx/portraits/missing.png";
   }
 }
@@ -60,7 +60,8 @@ let companions = {
       def: 5
     },
     powers: [
-      new first_aid({})
+      new first_aid(),
+      new summon_wolf()
     ],
     color: "rgb(214, 107, 30)",
     level: 1
@@ -81,7 +82,9 @@ let playerCharacter = new Player({
     def: 5
   },
   powers: [
-    new fireball({})
+    new fireball(),
+    new summon_wolf(),
+    new cleave()
   ],
   location: 0,
   oldLocation: 0,

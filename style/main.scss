@@ -7,7 +7,7 @@ body {
 .frame {
   position: fixed;
   width: 100vw;
-  height: 53vw;
+  height: 56.25vw;
   max-height: 100vh;
   background: grey;
   left: 0;
@@ -77,6 +77,10 @@ body {
       top: 0;
       overflow-y: auto;
       margin: 0;
+
+      img {
+        transform: rotateY(180deg);
+      }
     }
   }
 
@@ -135,6 +139,15 @@ body {
           top: 0.5vw;
           width: 2.15vw;
           border-radius: 50%;
+        }
+
+        .enemy {
+         filter: drop-shadow(0vw 0vw 0.2vw red);
+        }
+
+        .ally {
+          filter: drop-shadow(0vw 0vw 0.2vw lime);
+          transform: rotateY(180deg);
         }
       }
 

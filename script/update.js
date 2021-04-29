@@ -7,9 +7,10 @@ function update() {
   const foeContainer = document.querySelector(".infoBar .partyContainer");
   partyContainer.textContent = "";
   foeContainer.textContent = "";
-  partyContainer.append(characterPortrait(playerCharacter));
-  playerCharacter.party.forEach(comp => { partyContainer.append(characterPortrait(comp)) });
-  combat.characters.forEach(en=>{if(en.enemy) foeContainer.append(characterPortrait(en))});
+  combat.characters.forEach(char=>{
+    if(char.enemy) foeContainer.append(characterPortrait(char));
+    else partyContainer.append(characterPortrait(char));
+  }) 
   function characterPortrait(char) {
     const portrait = document.createElement("div");
     portrait.classList = "characterPortrait";

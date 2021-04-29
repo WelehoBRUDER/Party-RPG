@@ -27,5 +27,13 @@ const eq = {
     atk: 10,
     level: 1,
     action: "canes"
+  },
+  claws: {
+    id: "claws",
+    name: "Claws",
+    type: "weapon",
+    atk: 2,
+    level: 1,
+    action: "claws"
   }
 }
